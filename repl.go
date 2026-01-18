@@ -6,13 +6,44 @@ import (
 	"os"
 )
 
-func Repl() {
+type clicommand struct {
+	name        string
+	description string
+	callback    func() error
+}
+
+func repl() {
 	scanner := bufio.NewScanner(os.Stdin)
+	commands := getCommands()
 
 	for {
-		fmt.Print("Pokedex >")
+		fmt.Print("Pokedex > ")
 		scanner.Scan()
 		input := scanner.Text()
-		fmt.Printf("You entered: %s\n", input)
+		fmt.Println()
+		command := CleanInput(input)[0]
+
+		if _, ok := commands[command]; !ok {
+			fmt.Println("Command not found")
+			continue
+		}
+
+		commands[command].callback()
+	}
+}
+
+func getCommands() map[string]clicommand {
+
+	return map[string]clicommand{
+		"exit": {
+			name:        "exit",
+			description: "exit the program",
+			callback:    commandExit,
+		},
+		"help": {
+			name:        "help",
+			description: "list commands",
+			callback:    commandHelp,
+		},
 	}
 }
